@@ -1,0 +1,541 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자비의 예수 성당 주일학교 출석부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ebdc; --paper2:#faf6ee; --ink:#2c2418; --soft:#71634d;
+    --gold:#b1842a; --wine:#7c2f3b; --line:rgba(44,36,24,.13);
+    --present:#3f7a4c; --late:#c4881d; --absent:#a8392f;
+    --present-bg:#e3efe1; --late-bg:#f6ecd4; --absent-bg:#f4dedb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:"Gowun Dodum",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 600px at 15% -10%,#fbf3e2 0%,transparent 60%),
+      radial-gradient(900px 500px at 100% 110%,#efe3cd 0%,transparent 55%),var(--paper);
+    min-height:100vh;line-height:1.5}
+  .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 64px}
+  header{text-align:center;padding:18px 0 14px;border-bottom:2px solid var(--line);position:relative}
+  header::before{content:"\271D";display:block;font-size:22px;color:var(--gold);margin-bottom:2px}
+  h1{font-family:"Gowun Batang",serif;font-weight:700;font-size:clamp(24px,5vw,34px);margin:0;letter-spacing:.5px}
+  .sub{color:var(--soft);font-size:13px;margin-top:6px;letter-spacing:1px}
+
+  .tabs{display:flex;gap:6px;justify-content:center;margin:18px 0 14px;flex-wrap:wrap}
+  .tab{font-family:"Gowun Batang",serif;font-size:15px;padding:9px 20px;border:1.5px solid var(--line);
+    background:var(--paper2);color:var(--soft);border-radius:999px;cursor:pointer;transition:.15s}
+  .tab:hover{border-color:var(--gold)}
+  .tab.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .eyebrow{font-family:"Gowun Batang",serif;color:var(--gold);font-size:13px;letter-spacing:4px}
+  .ttabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0 0 16px}
+  .tchip{font-family:"Gowun Dodum";font-size:13px;padding:6px 14px;border:1.5px solid var(--line);
+    background:var(--paper2);color:var(--soft);border-radius:8px;cursor:pointer;transition:.15s}
+  .tchip:hover{border-color:var(--gold)}
+  .tchip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+  .banner{background:linear-gradient(120deg,#fbf1d8,#f6e6c4);border:1.5px solid var(--gold);
+    border-radius:14px;padding:14px 18px;margin-bottom:14px;box-shadow:0 10px 26px -18px rgba(124,47,59,.6)}
+  .banner .bdate{font-family:"Gowun Batang",serif;color:var(--wine);font-size:15px;margin-bottom:6px}
+  .banner .blist div{font-size:14px;margin:3px 0}
+  .banner b{color:var(--wine)}
+
+  .legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12.5px;color:var(--soft);margin-bottom:12px}
+  .legend b{display:inline-flex;align-items:center;gap:5px;font-weight:400}
+  .dot{width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font-size:12px;font-weight:700}
+  .dot.p{background:var(--present-bg);color:var(--present)} .dot.l{background:var(--late-bg);color:var(--late)}
+  .dot.a{background:var(--absent-bg);color:var(--absent)} .dot.b{background:#fff;border:1px dashed var(--line);color:transparent}
+  .dot.v{background:repeating-linear-gradient(45deg,#f6ecd4,#f6ecd4 4px,#ecdcb6 4px,#ecdcb6 8px);color:var(--gold);font-size:10px}
+
+  .toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:10px}
+  .btn{font-family:"Gowun Dodum";font-size:13px;padding:7px 14px;border:1.5px solid var(--line);
+    background:var(--paper2);border-radius:8px;cursor:pointer;color:var(--ink);transition:.15s}
+  .btn:hover{border-color:var(--gold)} .btn.primary{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .hint{font-size:12px;color:var(--soft);text-align:center;margin:4px 0 12px}
+
+  .scroll{overflow:auto;border:1.5px solid var(--line);border-radius:12px;background:var(--paper2);
+    box-shadow:0 14px 34px -22px rgba(44,36,24,.5);max-height:74vh}
+  table{border-collapse:separate;border-spacing:0;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+  thead th{position:sticky;top:0;z-index:3;background:#efe6d3;color:var(--ink);font-weight:400;font-family:"Gowun Batang",serif}
+  .dh{padding:6px 5px;text-align:center;min-width:42px;line-height:1.15}
+  .dh .wk{font-size:9px;color:var(--soft);display:block}
+  .dh.vacm{background:#ead9b3} .dh.vacm .wk{color:var(--gold);font-weight:700}
+  .hcake{font-size:9px;margin-left:1px}
+  thead .corner{left:0;z-index:5;background:#e7dcc4;text-align:left;padding:8px 10px;min-width:122px;width:122px}
+  .name-c{position:sticky;left:0;z-index:2;background:var(--paper2);padding:7px 10px;min-width:122px;width:122px}
+  .name-c .nm{font-family:"Gowun Batang",serif;font-size:14px} .name-c .gr{font-size:10.5px;color:var(--soft)}
+  tr.alt .name-c{background:#f6efe0} tr.alt td.cell{background:#fbf8f0}
+  .grp-name{position:sticky;left:0;z-index:4;background:var(--wine);color:#fff;font-family:"Gowun Batang",serif;
+    font-size:13px;padding:6px 10px;min-width:122px;width:122px}
+  .grp-name .cnt{opacity:.75;font-size:11px} .grp-band{background:var(--wine)}
+  .cell{position:relative;text-align:center;cursor:pointer;font-weight:700;font-size:14px;height:38px;color:transparent;
+    transition:background .1s;user-select:none}
+  .cell.p{background:var(--present-bg)!important;color:var(--present)}
+  .cell.l{background:var(--late-bg)!important;color:var(--late)}
+  .cell.a{background:var(--absent-bg)!important;color:var(--absent)}
+  .cell.celeb::after{content:"🎂";position:absolute;top:0;right:1px;font-size:9px;line-height:1}
+  .cell.vac{background:repeating-linear-gradient(45deg,#f6ecd4,#f6ecd4 6px,#ecdcb6 6px,#ecdcb6 12px)!important;
+    color:var(--gold);cursor:default;font-family:"Gowun Batang",serif;font-size:11px;font-weight:400}
+  .cell:not(.vac):active{filter:brightness(.94)}
+  .monsep{border-right:2px solid var(--gold)}
+  .picker{position:fixed;z-index:60;background:var(--paper2);border:1.5px solid var(--gold);border-radius:13px;
+    box-shadow:0 16px 36px -12px rgba(44,36,24,.55);padding:7px;display:flex;flex-direction:column;gap:3px;min-width:140px}
+  .picker .ptitle{font-family:"Gowun Batang",serif;font-size:12px;color:var(--soft);padding:3px 10px 5px;border-bottom:1px solid var(--line);margin-bottom:2px}
+  .picker button{display:flex;align-items:center;gap:10px;font-family:"Gowun Dodum";font-size:14.5px;
+    padding:9px 12px;border:none;background:none;border-radius:9px;cursor:pointer;text-align:left;color:var(--ink)}
+  .picker button:hover{background:#efe6d3}
+  .picker button.cur{background:#efe6d3;font-weight:700}
+  .picker .ic{width:20px;text-align:center;font-weight:700;font-size:15px}
+  .picker button[data-v="p"] .ic{color:var(--present)}
+  .picker button[data-v="l"] .ic{color:var(--late)}
+  .picker button[data-v="a"] .ic{color:var(--absent)}
+  .picker button.clr{color:var(--soft);border-top:1px solid var(--line);margin-top:2px;border-radius:0 0 9px 9px}
+  .rpanel{background:var(--paper2);border:1.5px solid var(--gold);border-radius:12px;padding:14px;margin-bottom:12px}
+  .rpanel .rrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+  .rpanel label{font-size:12px;color:var(--soft);display:block;margin-bottom:3px}
+  .rpanel select{width:100%;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;font-family:"Gowun Dodum";font-size:13.5px;background:#fff}
+  .rpanel .ractions{display:flex;gap:8px;justify-content:flex-end}
+  .dh.hclick{cursor:pointer} .dh.hclick:hover{background:#e7d8b3}
+  .name-c.nameclick{cursor:pointer} .name-c.nameclick:hover{background:#efe6d3}
+
+  .cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .card{flex:1;min-width:140px;background:var(--paper2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+  .card .num{font-family:"Gowun Batang",serif;font-size:30px;color:var(--wine)} .card .lab{font-size:12px;color:var(--soft);margin-top:2px}
+  .stbl{width:100%;border-collapse:collapse;background:var(--paper2);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+  .stbl th,.stbl td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:center}
+  .stbl th{background:#efe6d3;font-family:"Gowun Batang",serif;font-weight:400} .stbl td.l{text-align:left}
+  .stbl tr.sgrp td{background:#ead9b3;font-family:"Gowun Batang",serif;color:var(--wine);text-align:left}
+  .stbl tr.ssub td{background:#f4ecdb;font-style:normal;color:var(--soft)} .stbl tr.ssub td.l{font-family:"Gowun Batang",serif}
+  .sscroll{overflow-x:auto}
+  .stbl td.mc{font-weight:700;color:var(--soft);min-width:38px}
+  .stbl td.mc.p{background:var(--present-bg);color:var(--present)}
+  .stbl td.mc.l{background:var(--late-bg);color:var(--late)}
+  .stbl td.mc.a{background:var(--absent-bg);color:var(--absent)}
+  .bar{height:8px;border-radius:5px;background:#e7dcc4;overflow:hidden;margin-top:4px}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--wine))} .pct{font-family:"Gowun Batang",serif}
+
+  .ghead{font-family:"Gowun Batang",serif;color:var(--wine);font-size:17px;margin:18px 0 8px;border-bottom:1.5px solid var(--gold);padding-bottom:4px}
+  .ghead small{color:var(--soft);font-size:12px;font-family:"Gowun Dodum"}
+  .rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .rc{background:var(--paper2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;position:relative}
+  .rc .top{display:flex;align-items:baseline;gap:8px} .rc .rn{font-family:"Gowun Batang",serif;font-size:18px} .rc .bn{color:var(--wine);font-size:13px}
+  .rc .badge{position:absolute;top:12px;right:14px;font-size:11px;color:var(--soft);background:#efe6d3;padding:2px 9px;border-radius:999px}
+  .rc dl{margin:8px 0 0;font-size:12.5px;color:var(--soft);display:grid;grid-template-columns:auto 1fr;gap:3px 8px} .rc dt{color:var(--ink)}
+  .feast{color:var(--gold)} .rc .del{position:absolute;bottom:10px;right:12px;font-size:11px;color:var(--absent);background:none;border:none;cursor:pointer}
+  .form{background:var(--paper2);border:1.5px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .form h3{font-family:"Gowun Batang",serif;margin:0 0 10px;font-weight:700}
+  .frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+  .form label{font-size:12px;color:var(--soft);display:block;margin-bottom:3px}
+  .form input,.form select{width:100%;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;font-family:"Gowun Dodum";font-size:13.5px;background:#fff}
+  .form .actions{display:flex;gap:8px;justify-content:flex-end}
+  footer{text-align:center;color:var(--soft);font-size:11.5px;margin-top:26px} .hide{display:none}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">제주교구 남원</div>
+    <h1>자비의 예수 성당</h1>
+    <div class="sub">주일학교 출석부 · 2026년 3월 ~ 12월 · 8월 여름방학</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-v="grid">출석부</button>
+    <button class="tab" data-v="stats">통계</button>
+    <button class="tab" data-v="roster">명단 · 반</button>
+  </div>
+
+  <div class="ttabs" id="teacherTabs"></div>
+
+  <section id="v-grid">
+    <div id="celebBanner"></div>
+    <div class="legend">
+      <b><span class="dot b"></span>미체크</b><b><span class="dot p">✓</span>출석</b>
+      <b><span class="dot l">△</span>지각</b><b><span class="dot a">✕</span>결석</b>
+      <b><span class="dot v">휴</span>여름방학</b><b>🎂 축일 주간</b>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="rangeBtn">📅 기간 일괄 설정</button>
+      <button class="btn" id="export">📄 CSV 내보내기</button>
+      <button class="btn" id="reset">↺ 초기화</button>
+    </div>
+    <div id="rangePanel" class="rpanel hide">
+      <div class="rrow">
+        <div><label>시작 주일</label><select id="r-start"></select></div>
+        <div><label>종료 주일</label><select id="r-end"></select></div>
+        <div><label>대상</label><select id="r-target"></select></div>
+        <div><label>상태</label><select id="r-status">
+          <option value="p">출석</option><option value="l">지각</option><option value="a">결석</option><option value="">미체크</option>
+        </select></div>
+      </div>
+      <div class="ractions"><button class="btn" id="r-cancel">닫기</button><button class="btn primary" id="r-apply">이 기간에 적용</button></div>
+    </div>
+    <p class="hint">셀을 탭하면 <b>출석·지각·결석</b> 아이콘이 나타나 바로 체크됩니다. <b>날짜 머리글</b>을 누르면 그 주일 <b>전체 학생</b>을, <b>학생 이름</b>을 누르면 그 학생의 <b>전 주일</b>을 한 번에 설정할 수 있어요. 8월은 여름방학이며 입력은 자동 저장됩니다.</p>
+    <div class="scroll"><table id="grid"></table></div>
+  </section>
+
+  <section id="v-stats" class="hide">
+    <div class="ttabs" id="statMonths"></div>
+    <div class="cards">
+      <div class="card"><div class="num" id="s-students">16</div><div class="lab">학생 수</div></div>
+      <div class="card"><div class="num" id="s-weeks">0</div><div class="lab">출석 주일</div></div>
+      <div class="card"><div class="num" id="s-rate">0%</div><div class="lab">출석률</div></div>
+      <div class="card"><div class="num" id="s-marked">0</div><div class="lab">체크 완료</div></div>
+    </div>
+    <div class="sscroll"><table class="stbl"><thead id="statHead"></thead><tbody id="statBody"></tbody></table></div>
+  </section>
+
+  <section id="v-roster" class="hide">
+    <div id="formWrap"></div>
+    <div id="rosterBody"></div>
+  </section>
+
+  <footer>제주교구 남원 자비의 예수 성당 주일학교 · 데이터는 이 기기에 안전하게 저장됩니다</footer>
+</div>
+
+<div id="picker" class="picker hide">
+  <div class="ptitle"></div>
+  <button data-v="p"><span class="ic">✓</span>출석</button>
+  <button data-v="l"><span class="ic">△</span>지각</button>
+  <button data-v="a"><span class="ic">✕</span>결석</button>
+  <button data-v="" class="clr"><span class="ic">⌫</span>미체크</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ===== 공유(클라우드) 설정 =====================================
+   여러 기기·여러 선생님이 같은 출결을 공유하려면 아래 값을 채우세요.
+   (Firebase 콘솔 → 프로젝트 설정 → 웹 앱 → firebaseConfig 복사)
+   비워두면 이 기기 브라우저에만 저장됩니다(localStorage).            */
+const FIREBASE_CONFIG={
+ apiKey: "AIzaSyCG_ye7uusY7okFWnMNpDbfAW_5rfdgD7Y",
+  authDomain: "attendance-1a939.firebaseapp.com",
+  databaseURL: "https://attendance-1a939-default-rtdb.firebaseio.com",
+  projectId: "attendance-1a939",
+};
+/* =============================================================== */
+const USE_CLOUD=!!(FIREBASE_CONFIG.databaseURL&&FIREBASE_CONFIG.apiKey&&window.firebase);
+let db=null;
+if(USE_CLOUD){try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();}catch(e){console.warn("Firebase init 실패",e);}}
+
+const BASE=[
+ {n:1, grade:"유치부", name:"고태온", bn:"사도요한", sex:"남", feast:"12.27", guardian:"부) 고경남 베드로 · 모) 조윤주 율리아", teacher:"신현하 수산나"},
+ {n:2, grade:"초등1", name:"신서율", bn:"라파엘라", sex:"여", feast:"5.2", guardian:"모) 허유리 모니카", teacher:"신현하 수산나"},
+ {n:3, grade:"초등1", name:"강하준", bn:"사도요한", sex:"남", feast:"12.27", guardian:"모) 강소은 요안나", teacher:"신현하 수산나"},
+ {n:4, grade:"초등2", name:"오준우", bn:"사도요한", sex:"남", feast:"12.27", guardian:"모) 김혜리 수산나", teacher:"정지은 율리아나"},
+ {n:5, grade:"초등2", name:"오은서", bn:"크리스티나", sex:"여", feast:"3.13", guardian:"모) 신현하 수산나", teacher:"정지은 율리아나"},
+ {n:6, grade:"초등3", name:"신유범", bn:"프란치스코", sex:"남", feast:"10.4", guardian:"조모) 오춘심 안젤라", teacher:"고은이 아가다"},
+ {n:7, grade:"초등4", name:"오현서", bn:"베로니카", sex:"여", feast:"7.12", guardian:"모) 신현하 수산나", teacher:"문은주 요한보스코"},
+ {n:8, grade:"초등4", name:"김아라", bn:"플로라", sex:"여", feast:"-", guardian:"모) 박선우 아녜스", teacher:"문은주 요한보스코"},
+ {n:9, grade:"초등4", name:"고현석", bn:"스타치스", sex:"남", feast:"10.31", guardian:"모) 오은희 마틸다", teacher:"문은주 요한보스코"},
+ {n:10, grade:"견진", name:"신서주", bn:"베로니카", sex:"여", feast:"7.12", guardian:"모) 허유리 모니카", teacher:"김범훈 베드로"},
+ {n:11, grade:"견진", name:"오태린", bn:"실비아", sex:"여", feast:"11.3", guardian:"모) 김혜리 수산나", teacher:"김범훈 베드로"},
+ {n:12, grade:"견진", name:"구현서", bn:"라헬", sex:"여", feast:"11.1", guardian:"모) 오진정", teacher:"김범훈 베드로"},
+ {n:13, grade:"중2", name:"문정우", bn:"베드로", sex:"남", feast:"6.29", guardian:"부) 문은주 요한보스코 · 모) 고은이 아가다", teacher:"현지선 크리스티나"},
+ {n:14, grade:"중3", name:"오성엽", bn:"라파엘", sex:"남", feast:"9.29", guardian:"부) 오현우 마르띠노", teacher:"현지선 크리스티나"},
+ {n:15, grade:"고1", name:"문지우", bn:"글라라", sex:"여", feast:"8.11", guardian:"부) 문은주 요한보스코 · 모) 고은이 아가다", teacher:"홍승협 베네딕토"},
+ {n:16, grade:"고2", name:"신서희", bn:"소피아", sex:"여", feast:"4.30", guardian:"모) 허유리 모니카", teacher:"홍승협 베네딕토"},
+];
+
+const YEAR=2026, VAC_MONTH=8;
+function buildSundays(){const out=[];let d=new Date(YEAR,2,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);
+  const end=new Date(YEAR,11,31);while(d<=end){out.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`,m:d.getMonth()+1,day:d.getDate()});d=new Date(d);d.setDate(d.getDate()+7);}return out;}
+const SUNDAYS=buildSundays();
+const isVac=s=>s.m===VAC_MONTH;
+const CYCLE=["","p","l","a"]; const MARK={p:"✓",l:"△",a:"✕"};
+const dateFromKey=k=>{const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d);};
+
+let data={}, extras=[], nextId=17, STUDENTS=BASE.slice();
+let celebCell=new Map(), celebHeader=new Set(), celebBySunday=new Map();
+
+const KEY="seongdang-attendance-2026", RKEY="seongdang-roster-2026";
+let loaded=false;
+function refreshAll(){renderTeacherTabs();renderGrid();
+  if(!document.getElementById("v-stats").classList.contains("hide")){renderStatMonths();renderStats();}
+  if(!document.getElementById("v-roster").classList.contains("hide"))renderRoster();}
+async function load(){
+  if(USE_CLOUD){
+    await new Promise(res=>db.ref("attendance").once("value",s=>{data=s.val()||{};res();}));
+    await new Promise(res=>db.ref("roster").once("value",s=>{const o=s.val();if(o){extras=o.extras||[];nextId=o.nextId||17;}res();}));
+    STUDENTS=BASE.concat(extras);
+    db.ref("attendance").on("value",s=>{if(!loaded)return;const nd=s.val()||{};if(JSON.stringify(nd)===JSON.stringify(data))return;data=nd;refreshAll();});
+    db.ref("roster").on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
+    return;
+  }
+  try{const r=localStorage.getItem(KEY);if(r)data=JSON.parse(r);}catch(e){data={};}
+  try{const r=localStorage.getItem(RKEY);if(r){const o=JSON.parse(r);extras=o.extras||[];nextId=o.nextId||17;}}catch(e){extras=[];}
+  STUDENTS=BASE.concat(extras);
+}
+let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>{
+  if(USE_CLOUD){db.ref("attendance").set(data).catch(()=>{});}
+  else{try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}},150);}
+async function saveRoster(){
+  if(USE_CLOUD){db.ref("roster").set({extras,nextId}).catch(()=>{});}
+  else{try{localStorage.setItem(RKEY,JSON.stringify({extras,nextId}));}catch(e){}}}
+
+/* ---- 축일 ---- */
+function parseFeast(s){if(!s)return null;const m=String(s).match(/(\d{1,2})\D+(\d{1,2})/);if(!m)return null;
+  const mo=+m[1],d=+m[2];if(mo<1||mo>12||d<1||d>31)return null;return{m:mo,d};}
+function announceIndex(fd){const first=dateFromKey(SUNDAYS[0].key);
+  const diff=Math.floor((fd-first)/86400000);if(diff<0)return null;
+  let idx=Math.floor(diff/7);if(idx>=SUNDAYS.length)return null;
+  let onDay=(diff%7===0);while(idx>=0&&isVac(SUNDAYS[idx])){idx--;onDay=false;}
+  if(idx<0)return null;return{idx,onDay};}
+function computeCeleb(){celebCell=new Map();celebHeader=new Set();celebBySunday=new Map();
+  STUDENTS.forEach(st=>{const f=parseFeast(st.feast);if(!f)return;
+    const a=announceIndex(new Date(YEAR,f.m-1,f.d));if(!a)return;const sun=SUNDAYS[a.idx];
+    celebCell.set(st.n+"|"+sun.key,true);celebHeader.add(sun.key);
+    if(!celebBySunday.has(sun.key))celebBySunday.set(sun.key,[]);
+    celebBySunday.get(sun.key).push({name:st.name,bn:st.bn,sex:st.sex,m:f.m,d:f.d,onDay:a.onDay});});}
+function relWord(sex){return sex==="남"?"형제":(sex==="여"?"자매":"님");}
+function celebLine(e){const who=`${e.name}${e.bn?" "+e.bn:""} ${relWord(e.sex)}`.trim();
+  return e.onDay?`<div>🎉 오늘은 <b>${who}</b>의 축일입니다. 축하합니다!</div>`
+                :`<div>🎂 다가오는 ${e.m}/${e.d}, <b>${who}</b>의 축일을 함께 축하해요.</div>`;}
+function getAnnounceSunday(st){const f=parseFeast(st.feast);if(!f)return null;const a=announceIndex(new Date(YEAR,f.m-1,f.d));return a?SUNDAYS[a.idx]:null;}
+
+/* ---- 반 그룹 ---- */
+function groups(){const order=[],map=new Map();STUDENTS.forEach(st=>{const t=(st.teacher&&st.teacher.trim())?st.teacher.trim():"미배정";
+  if(!map.has(t)){map.set(t,[]);order.push(t);}map.get(t).push(st);});return order.map(t=>({teacher:t,members:map.get(t)}));}
+
+/* ---- 축하 배너 ---- */
+function renderBanner(){const wrap=document.getElementById("celebBanner");const now=new Date();
+  const todaySun=new Date(now);todaySun.setHours(0,0,0,0);todaySun.setDate(todaySun.getDate()-todaySun.getDay());
+  let best=null;SUNDAYS.forEach(s=>{if(!celebBySunday.has(s.key))return;const sd=dateFromKey(s.key);
+    if(sd>=todaySun&&(!best||dateFromKey(best.key)>sd))best=s;});
+  if(!best){wrap.innerHTML="";return;}
+  const lines=celebBySunday.get(best.key).map(celebLine).join("");
+  wrap.innerHTML=`<div class="banner"><div class="bdate">🎈 ${best.m}월 ${best.day}일 주일 · 축일 안내</div><div class="blist">${lines}</div></div>`;}
+
+/* ---- 선생님(반) 탭 필터 ---- */
+const ALL="__ALL__";let selectedTeacher=ALL;
+function teacherNames(){return groups().map(g=>g.teacher);}
+function filteredGroups(){const gs=groups();if(selectedTeacher===ALL)return gs;
+  const f=gs.filter(g=>g.teacher===selectedTeacher);return f.length?f:gs;}
+function renderTeacherTabs(){const tl=teacherNames();
+  if(selectedTeacher!==ALL&&!tl.includes(selectedTeacher))selectedTeacher=tl[0]||ALL;
+  const bar=document.getElementById("teacherTabs");
+  let html=tl.map(t=>`<button class='tchip${t===selectedTeacher?" on":""}' data-t="${t}">${t}</button>`).join("");
+  html+=`<button class='tchip${selectedTeacher===ALL?" on":""}' data-t="${ALL}">전체 보기</button>`;
+  bar.innerHTML=html;
+  bar.querySelectorAll(".tchip").forEach(b=>b.addEventListener("click",()=>{
+    selectedTeacher=b.dataset.t;renderTeacherTabs();rerenderActive();}));}
+function rerenderActive(){renderGrid();
+  if(!document.getElementById("v-stats").classList.contains("hide"))renderStats();
+  if(!document.getElementById("v-roster").classList.contains("hide"))renderRoster();}
+
+/* ---- 출석 그리드 ---- */
+function renderGrid(){computeCeleb();renderBanner();
+  const t=document.getElementById("grid");let prevM=null;
+  let head="<thead><tr><th class='corner'>반 / 성명</th>";
+  SUNDAYS.forEach((s,i)=>{const newM=s.m!==prevM;prevM=s.m;
+    const sep=(i<SUNDAYS.length-1&&SUNDAYS[i+1].m!==s.m)?" monsep":"";const vac=isVac(s)?" vacm":"";
+    const lab=newM?(isVac(s)?"여름방학":`${s.m}월`):"&nbsp;";
+    const cake=celebHeader.has(s.key)?"<span class='hcake'>🎂</span>":"";
+    const hc=isVac(s)?"":" hclick";const hk=isVac(s)?"":` data-hk='${s.key}'`;
+    const htt=isVac(s)?"":" title='이 주일 전체 학생 한 번에 설정'";
+    head+=`<th class='dh${sep}${vac}${hc}'${hk}${htt}><span class='wk'>${lab}</span>${s.day}${cake}</th>`;});
+  head+="</tr></thead>";
+  let body="<tbody>",alt=0;
+  filteredGroups().forEach(g=>{
+    if(selectedTeacher===ALL) body+=`<tr class='grp'><td class='grp-name'>${g.teacher} 선생님 반 <span class='cnt'>${g.members.length}명</span></td><td class='grp-band' colspan='${SUNDAYS.length}'></td></tr>`;
+    g.members.forEach(st=>{const cls=(alt++%2)?" alt":"";
+      body+=`<tr class='${cls.trim()}'><td class='name-c nameclick' data-n='${st.n}' title='이 학생 전 주일 한 번에 설정'><div class='nm'>${st.name}</div><div class='gr'>${st.grade} · ${st.bn||""}</div></td>`;
+      SUNDAYS.forEach((s,i)=>{const sep=(i<SUNDAYS.length-1&&SUNDAYS[i+1].m!==s.m)?" monsep":"";
+        if(isVac(s)){body+=`<td class='cell vac${sep}'>휴</td>`;return;}
+        const v=(data[st.n]&&data[st.n][s.key])||"";
+        const cb=celebCell.has(st.n+"|"+s.key)?" celeb":"";
+        const ttl=cb?` title='🎂 이번 주 ${st.name}의 축일을 축하해요'`:"";
+        body+=`<td class='cell ${v}${cb}${sep}' data-s='${st.n}' data-d='${s.key}'${ttl}>${MARK[v]||""}</td>`;});
+      body+="</tr>";});});
+  body+="</tbody>";t.innerHTML=head+body;
+  t.querySelectorAll(".cell:not(.vac)").forEach(c=>c.addEventListener("click",onCell));
+  t.querySelectorAll("th.hclick").forEach(h=>h.addEventListener("click",e=>{e.stopPropagation();openBulkCol(h,h.dataset.hk);}));
+  t.querySelectorAll("td.nameclick").forEach(td=>td.addEventListener("click",e=>{e.stopPropagation();openBulkRow(td,+td.dataset.n);}));
+  document.getElementById("s-students").textContent=filteredGroups().reduce((a,g)=>a+g.members.length,0);}
+let activeCell=null,bulkMode=null,bulkKey=null,bulkStudent=null;
+const LABK={p:"출석",l:"지각",a:"결석","":"미체크"};
+function applyCell(c,v){c.classList.remove("p","l","a");if(v)c.classList.add(v);c.textContent=MARK[v]||"";}
+function setPicker(title,cur){const p=document.getElementById("picker");p.querySelector(".ptitle").textContent=title;
+  p.querySelectorAll("button").forEach(b=>b.classList.toggle("cur",b.dataset.v===cur));}
+function placePicker(anchor){const p=document.getElementById("picker");p.classList.remove("hide");
+  const r=anchor.getBoundingClientRect(),pw=p.offsetWidth||150,ph=p.offsetHeight||210;
+  let left=Math.max(8,Math.min(r.left,window.innerWidth-pw-8));
+  let top=r.bottom+6;if(top+ph>window.innerHeight-8)top=Math.max(8,r.top-ph-6);
+  p.style.left=left+"px";p.style.top=top+"px";}
+function onCell(e){e.stopPropagation();const c=e.currentTarget;bulkMode=null;bulkKey=null;bulkStudent=null;
+  activeCell={c,s:c.dataset.s,d:c.dataset.d};const cur=(data[activeCell.s]&&data[activeCell.s][activeCell.d])||"";
+  const st=STUDENTS.find(x=>String(x.n)===String(activeCell.s));const dd=activeCell.d.split("-");
+  setPicker(`${st?st.name:""} · ${+dd[1]}/${+dd[2]} 주일`,cur);placePicker(c);}
+function openBulkCol(h,key){bulkMode="col";bulkKey=key;bulkStudent=null;activeCell=null;
+  const s=SUNDAYS.find(x=>x.key===key);setPicker(`${s.m}/${s.day} 주일 · 전체 학생 한 번에`,"");placePicker(h);}
+function openBulkRow(td,n){bulkMode="row";bulkStudent=n;bulkKey=null;activeCell=null;
+  const st=STUDENTS.find(x=>x.n===n);setPicker(`${st?st.name:""} · 전 주일 한 번에`,"");placePicker(td);}
+function setCell(v){if(!activeCell)return;const{c,s,d}=activeCell;if(!data[s])data[s]={};
+  if(v)data[s][d]=v;else delete data[s][d];applyCell(c,v);save();closePicker();}
+function setBulk(v){
+  if(bulkMode==="col"){const key=bulkKey;
+    filteredGroups().forEach(g=>g.members.forEach(st=>{if(!data[st.n])data[st.n]={};
+      if(v)data[st.n][key]=v;else delete data[st.n][key];
+      const c=document.querySelector(`#grid td.cell[data-s='${st.n}'][data-d='${key}']`);if(c)applyCell(c,v);}));}
+  else if(bulkMode==="row"){const n=bulkStudent,st=STUDENTS.find(x=>x.n===n);
+    if(!confirm(`${st?st.name:""} 학생의 모든 주일을 '${LABK[v]}'(으)로 설정할까요? 기존 입력을 덮어씁니다.`)){closePicker();return;}
+    SUNDAYS.filter(s=>!isVac(s)).forEach(s=>{if(!data[n])data[n]={};
+      if(v)data[n][s.key]=v;else delete data[n][s.key];
+      const c=document.querySelector(`#grid td.cell[data-s='${n}'][data-d='${s.key}']`);if(c)applyCell(c,v);});}
+  save();closePicker();}
+function closePicker(){document.getElementById("picker").classList.add("hide");activeCell=null;bulkMode=null;bulkKey=null;bulkStudent=null;}
+document.querySelectorAll("#picker button").forEach(b=>b.addEventListener("click",ev=>{ev.stopPropagation();
+  if(bulkMode)setBulk(b.dataset.v);else setCell(b.dataset.v);}));
+document.addEventListener("click",e=>{const p=document.getElementById("picker");
+  if(p.classList.contains("hide"))return;
+  if(!p.contains(e.target)&&!e.target.closest(".cell")&&!e.target.closest(".hclick")&&!e.target.closest(".nameclick"))closePicker();});
+window.addEventListener("scroll",closePicker,true);
+
+/* ---- 통계 (반별 · 월별) ---- */
+let statMonth="ALL";
+const MONTHS=[...new Set(SUNDAYS.map(s=>s.m))];
+function renderStatMonths(){const bar=document.getElementById("statMonths");
+  let h=`<button class='tchip${statMonth==="ALL"?" on":""}' data-m='ALL'>전체</button>`;
+  h+=MONTHS.map(m=>`<button class='tchip${statMonth===m?" on":""}' data-m='${m}'>${m}월</button>`).join("");
+  bar.innerHTML=h;
+  bar.querySelectorAll(".tchip").forEach(b=>b.addEventListener("click",()=>{
+    statMonth=b.dataset.m==="ALL"?"ALL":+b.dataset.m;renderStatMonths();renderStats();}));}
+function renderStats(){
+  const head=document.getElementById("statHead"),body=document.getElementById("statBody");body.innerHTML="";
+  let SC=0;filteredGroups().forEach(g=>SC+=g.members.length);document.getElementById("s-students").textContent=SC;
+
+  if(statMonth!=="ALL"&&statMonth===VAC_MONTH){
+    document.getElementById("s-weeks").textContent=0;document.getElementById("s-marked").textContent=0;document.getElementById("s-rate").textContent="–";
+    head.innerHTML="<tr><th class='l'>안내</th></tr>";
+    body.innerHTML="<tr><td class='l' style='padding:18px'>8월은 여름방학입니다. 이 달의 출결 기록은 없습니다.</td></tr>";return;}
+
+  const weeks=SUNDAYS.filter(s=>!isVac(s)&&(statMonth==="ALL"||s.m===statMonth));
+  document.getElementById("s-weeks").textContent=weeks.length;
+  let TP=0,TM=0;
+
+  if(statMonth==="ALL"){
+    head.innerHTML="<tr><th class='l'>학년 / 성명</th><th>출석</th><th>지각</th><th>결석</th><th style='min-width:130px'>출석률</th></tr>";
+    filteredGroups().forEach(g=>{
+      body.insertAdjacentHTML("beforeend",`<tr class='sgrp'><td class='l' colspan='5'>${g.teacher} 선생님 반</td></tr>`);
+      let gp=0,gl=0,ga=0;
+      g.members.forEach(st=>{let p=0,l=0,a=0;
+        weeks.forEach(s=>{const v=data[st.n]&&data[st.n][s.key];if(v==="p")p++;else if(v==="l")l++;else if(v==="a")a++;});
+        gp+=p;gl+=l;ga+=a;const m=p+l+a;TM+=m;TP+=p+l*0.5;const rate=m?Math.round(((p+l*0.5)/m)*100):0;
+        body.insertAdjacentHTML("beforeend",
+          `<tr><td class='l'><b>${st.name}</b> <span style='color:var(--soft);font-size:12px'>${st.grade}</span></td>
+           <td style='color:var(--present)'>${p}</td><td style='color:var(--late)'>${l}</td><td style='color:var(--absent)'>${a}</td>
+           <td><span class='pct'>${rate}%</span><div class='bar'><i style='width:${rate}%'></i></div></td></tr>`);});
+      const gm=gp+gl+ga,grate=gm?Math.round(((gp+gl*0.5)/gm)*100):0;
+      body.insertAdjacentHTML("beforeend",`<tr class='ssub'><td class='l'>반 합계</td><td>${gp}</td><td>${gl}</td><td>${ga}</td><td><span class='pct'>${grate}%</span></td></tr>`);});
+  } else {
+    const cols=weeks.map(s=>`<th>${s.m}/${s.day}</th>`).join(""),ncol=weeks.length+5;
+    head.innerHTML=`<tr><th class='l'>성명</th>${cols}<th>출</th><th>지</th><th>결</th><th>출석률</th></tr>`;
+    filteredGroups().forEach(g=>{
+      body.insertAdjacentHTML("beforeend",`<tr class='sgrp'><td class='l' colspan='${ncol}'>${g.teacher} 선생님 반</td></tr>`);
+      let gp=0,gl=0,ga=0;
+      g.members.forEach(st=>{let p=0,l=0,a=0,cells="";
+        weeks.forEach(s=>{const v=(data[st.n]&&data[st.n][s.key])||"";if(v==="p")p++;else if(v==="l")l++;else if(v==="a")a++;
+          cells+=`<td class='mc ${v}'>${MARK[v]||"·"}</td>`;});
+        gp+=p;gl+=l;ga+=a;const m=p+l+a;TM+=m;TP+=p+l*0.5;const rate=m?Math.round(((p+l*0.5)/m)*100):0;
+        body.insertAdjacentHTML("beforeend",
+          `<tr><td class='l'><b>${st.name}</b></td>${cells}<td style='color:var(--present)'>${p}</td><td style='color:var(--late)'>${l}</td><td style='color:var(--absent)'>${a}</td><td><span class='pct'>${rate}%</span></td></tr>`);});
+      const gm=gp+gl+ga,grate=gm?Math.round(((gp+gl*0.5)/gm)*100):0;
+      body.insertAdjacentHTML("beforeend",`<tr class='ssub'><td class='l' colspan='${weeks.length+1}'>반 합계</td><td>${gp}</td><td>${gl}</td><td>${ga}</td><td><span class='pct'>${grate}%</span></td></tr>`);});
+  }
+  document.getElementById("s-marked").textContent=TM;
+  document.getElementById("s-rate").textContent=(TM?Math.round((TP/TM)*100):0)+"%";}
+
+/* ---- 명단 · 반 ---- */
+function renderRoster(){computeCeleb();
+  document.getElementById("formWrap").innerHTML=
+   `<div class="form"><h3>명단 추가</h3>
+      <div class="frow">
+        <div><label>성명 *</label><input id="f-name" placeholder="홍길동"></div>
+        <div><label>학년</label><input id="f-grade" placeholder="초등5"></div>
+        <div><label>세례명</label><input id="f-bn" placeholder="요한"></div>
+        <div><label>성별</label><select id="f-sex"><option>남</option><option>여</option></select></div>
+      </div>
+      <div class="frow">
+        <div><label>축일 (월.일)</label><input id="f-feast" placeholder="6.24"></div>
+        <div><label>보호자</label><input id="f-guardian" placeholder="모) 홍OO 마리아"></div>
+        <div><label>교리교사 (반)</label><input id="f-teacher" placeholder="신현하 수산나"></div>
+      </div>
+      <div class="actions"><button class="btn primary" id="addBtn">+ 추가</button></div></div>`;
+  document.getElementById("addBtn").addEventListener("click",addStudent);
+
+  const b=document.getElementById("rosterBody");b.innerHTML="";
+  filteredGroups().forEach(g=>{
+    b.insertAdjacentHTML("beforeend",`<h2 class='ghead'>${g.teacher} 선생님 반 <small>· ${g.members.length}명</small></h2><div class='rcards' id='grp-${g.teacher.replace(/\s/g,'_')}'></div>`);
+    const box=b.lastElementChild;
+    g.members.forEach(st=>{const del=st.isExtra?`<button class='del' data-n='${st.n}'>✕ 삭제</button>`:"";
+      const f=parseFeast(st.feast);const as=getAnnounceSunday(st);
+      const feastTxt=f?`🎂 ${st.feast}`:"미정";
+      const cong=as?`<dt>축하 주일</dt><dd>${as.m}/${as.day} 주일</dd>`:"";
+      box.insertAdjacentHTML("beforeend",
+       `<div class='rc'><span class='badge'>No.${st.n}</span>
+          <div class='top'><span class='rn'>${st.name}</span><span class='bn'>${st.bn||""}</span></div>
+          <dl><dt>학년</dt><dd>${st.grade||"-"} (${st.sex||"-"})</dd>
+            <dt>축일</dt><dd class='feast'>${feastTxt}</dd>${cong}
+            <dt>보호자</dt><dd>${st.guardian||"-"}</dd>
+            <dt>교리교사</dt><dd>${st.teacher||"미배정"}</dd></dl>${del}</div>`);});});
+  b.querySelectorAll(".del").forEach(x=>x.addEventListener("click",()=>removeStudent(+x.dataset.n)));}
+function val(id){return document.getElementById(id).value.trim();}
+function addStudent(){const name=val("f-name");if(!name){alert("성명을 입력해 주세요.");return;}
+  const s={n:nextId++,isExtra:true,name,grade:val("f-grade")||"-",bn:val("f-bn"),sex:val("f-sex"),
+           feast:val("f-feast")||"-",guardian:val("f-guardian"),teacher:val("f-teacher")};
+  extras.push(s);STUDENTS=BASE.concat(extras);saveRoster();renderTeacherTabs();renderRoster();renderGrid();}
+function removeStudent(n){const s=STUDENTS.find(x=>x.n===n);
+  if(!confirm(`'${s?s.name:""}' 학생을 명단에서 삭제할까요?`))return;
+  extras=extras.filter(x=>x.n!==n);STUDENTS=BASE.concat(extras);delete data[n];saveRoster();save();renderTeacherTabs();renderRoster();renderGrid();}
+
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");const v=t.dataset.v;
+  document.getElementById("v-grid").classList.toggle("hide",v!=="grid");
+  document.getElementById("v-stats").classList.toggle("hide",v!=="stats");
+  document.getElementById("v-roster").classList.toggle("hide",v!=="roster");
+  if(v==="stats"){renderStatMonths();renderStats();}if(v==="roster")renderRoster();}));
+
+document.getElementById("export").addEventListener("click",()=>{
+  let rows=["반(교리교사),학년,성명,세례명,축일,"+SUNDAYS.map(s=>`${s.m}/${s.day}`).join(",")];
+  const lab={p:"출석",l:"지각",a:"결석",'':""};
+  groups().forEach(g=>g.members.forEach(st=>{
+    rows.push([g.teacher,st.grade,st.name,st.bn,st.feast,...SUNDAYS.map(s=>isVac(s)?"방학":lab[(data[st.n]&&data[st.n][s.key])||""])].join(","));}));
+  const blob=new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="성당_주일출석부_2026.csv";a.click();});
+
+document.getElementById("reset").addEventListener("click",async()=>{
+  if(!confirm("모든 출석 기록을 지울까요? 추가한 명단은 유지됩니다."))return;
+  data={};if(USE_CLOUD){db.ref("attendance").remove().catch(()=>{});}else{try{localStorage.removeItem(KEY);}catch(e){}}renderGrid();});
+
+/* ---- 기간 일괄 설정 ---- */
+function fillRangePanel(){
+  const opts=SUNDAYS.filter(s=>!isVac(s)).map(s=>`<option value="${s.key}">${s.m}/${s.day}</option>`).join("");
+  const a=document.getElementById("r-start"),b=document.getElementById("r-end");
+  a.innerHTML=opts;b.innerHTML=opts;a.selectedIndex=0;b.selectedIndex=b.options.length-1;
+  let th=`<option value="ALL">${selectedTeacher===ALL?"전체 학생":selectedTeacher+" 반 전체"}</option>`;
+  filteredGroups().forEach(g=>g.members.forEach(st=>{th+=`<option value="${st.n}">${st.name} (${st.grade})</option>`;}));
+  document.getElementById("r-target").innerHTML=th;}
+document.getElementById("rangeBtn").addEventListener("click",()=>{const p=document.getElementById("rangePanel");
+  if(p.classList.contains("hide")){fillRangePanel();p.classList.remove("hide");}else p.classList.add("hide");});
+document.getElementById("r-cancel").addEventListener("click",()=>document.getElementById("rangePanel").classList.add("hide"));
+document.getElementById("r-apply").addEventListener("click",()=>{
+  const sk=document.getElementById("r-start").value,ek=document.getElementById("r-end").value;
+  let a=SUNDAYS.findIndex(s=>s.key===sk),b=SUNDAYS.findIndex(s=>s.key===ek);
+  if(a<0||b<0)return;if(a>b){const t=a;a=b;b=t;}
+  const range=SUNDAYS.slice(a,b+1).filter(s=>!isVac(s));
+  const status=document.getElementById("r-status").value,tgt=document.getElementById("r-target").value;
+  let students=[];
+  if(tgt==="ALL")filteredGroups().forEach(g=>g.members.forEach(st=>students.push(st)));
+  else{const st=STUDENTS.find(x=>String(x.n)===tgt);if(st)students=[st];}
+  if(!range.length||!students.length){alert("적용할 주일 또는 대상이 없습니다.");return;}
+  const r0=range[0],r1=range[range.length-1];
+  const msg=`${r0.m}/${r0.day} ~ ${r1.m}/${r1.day} (${range.length}주일) · 대상 ${students.length}명을\n'${LABK[status]}'(으)로 설정할까요?\n해당 기간의 기존 입력을 덮어씁니다. (8월 방학 제외)`;
+  if(!confirm(msg))return;
+  students.forEach(st=>{if(!data[st.n])data[st.n]={};
+    range.forEach(s=>{if(status)data[st.n][s.key]=status;else delete data[st.n][s.key];});});
+  save();document.getElementById("rangePanel").classList.add("hide");renderGrid();});
+
+(async function(){await load();selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();loaded=true;})();
+</script>
