@@ -260,11 +260,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-/* ===== 공유(클라우드) 설정 =====================================
-   여러 기기에서 출결·활동을 공유하려면 아래 값을 채우세요.
-   (Firebase 콘솔 → 프로젝트 설정 → 웹 앱 → firebaseConfig 복사)
-   비워두면 이 기기 브라우저에만 저장됩니다(localStorage).            */
-const FIREBASE_CONFIG={ apiKey:"", authDomain:"", databaseURL:"", projectId:"" };
+/* ===== 공유(클라우드) 설정 — 기존 Firebase 프로젝트에 연결됨 ===== */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCG_ye7uusY7okFWnMNpDbfAW_5rfdgD7Y",
+  authDomain:"attendance-1a939.firebaseapp.com",
+  databaseURL:"https://attendance-1a939-default-rtdb.firebaseio.com",
+  projectId:"attendance-1a939"
+};
+/* 클라우드 저장 경로: 예전 데이터가 있는 곳(attendance 등)에 맞춤 */
+function cpath(k){return ({"seongdang-attendance-2026":"attendance","seongdang-roster-2026":"roster","seongdang-activity-2026":"activity","seongdang-stickers-2026":"stickers"})[k]||k;}
 /* =============================================================== */
 const USE_CLOUD=!!(FIREBASE_CONFIG.databaseURL&&FIREBASE_CONFIG.apiKey&&window.firebase);
 let db=null,loaded=false,cloudLoaded=false;
@@ -309,22 +313,22 @@ const KEY="seongdang-attendance-2026", RKEY="seongdang-roster-2026", AKEY="seong
 async function dbGet(k){
   if(USE_CLOUD){return await new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v);}};
     const t=setTimeout(()=>fin(null),4000);
-    try{db.ref(k).once("value",s=>{clearTimeout(t);fin(s.val()||null);},()=>{clearTimeout(t);fin(null);});}catch(e){clearTimeout(t);fin(null);}});}
+    try{db.ref(cpath(k)).once("value",s=>{clearTimeout(t);fin(s.val()||null);},()=>{clearTimeout(t);fin(null);});}catch(e){clearTimeout(t);fin(null);}});}
   try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
-function dbSet(k,v){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(k).set(v).catch(()=>{});}catch(e){}return;}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function dbDel(k){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(k).remove().catch(()=>{});}catch(e){}return;}try{localStorage.removeItem(k);}catch(e){}}
+function dbSet(k,v){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(cpath(k)).set(v).catch(()=>{});}catch(e){}return;}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function dbDel(k){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(cpath(k)).remove().catch(()=>{});}catch(e){}return;}try{localStorage.removeItem(k);}catch(e){}}
 async function load(){
   if(USE_CLOUD&&db){
     await new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res();}};const t=setTimeout(fin,4000);
-      try{db.ref(KEY).once("value",s=>{clearTimeout(t);const v=s.val();if(v)data=v;cloudLoaded=true;fin();},()=>{clearTimeout(t);fin();});}catch(e){clearTimeout(t);fin();}});
+      try{db.ref(cpath(KEY)).once("value",s=>{clearTimeout(t);const v=s.val();if(v)data=v;cloudLoaded=true;fin();},()=>{clearTimeout(t);fin();});}catch(e){clearTimeout(t);fin();}});
     try{const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
         const ac=await dbGet(AKEY);if(ac)activity=ac;
         const sk=await dbGet(SKEY);if(sk)stickers=sk;}catch(e){}
     STUDENTS=BASE.concat(extras);
-    db.ref(KEY).on("value",s=>{cloudLoaded=true;if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;refreshAll();});
-    db.ref(RKEY).on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
-    db.ref(AKEY).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(activity))return;activity=v;refreshAll();});
-    db.ref(SKEY).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(stickers))return;stickers=v;refreshAll();});
+    db.ref(cpath(KEY)).on("value",s=>{cloudLoaded=true;if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;refreshAll();});
+    db.ref(cpath(RKEY)).on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
+    db.ref(cpath(AKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(activity))return;activity=v;refreshAll();});
+    db.ref(cpath(SKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(stickers))return;stickers=v;refreshAll();});
     return;
   }
   try{
