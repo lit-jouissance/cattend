@@ -97,6 +97,27 @@
   .rpanel label{font-size:12px;color:var(--soft);display:block;margin-bottom:3px}
   .rpanel select{width:100%;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;font-family:"Gowun Dodum";font-size:13.5px;background:#fff}
   .rpanel .ractions{display:flex;gap:8px;justify-content:flex-end}
+  .funcard{background:var(--paper2);border:1.5px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .funcard .fh{font-family:"Gowun Batang",serif;margin:0 0 10px;font-weight:700;font-size:16px}
+  .funcard .fsub{font-family:"Gowun Dodum";font-size:11.5px;color:var(--soft);font-weight:400;margin-left:6px}
+  .funcard .frow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+  .funcard .frow>div{flex:1;min-width:150px}
+  .funcard label{font-size:12px;color:var(--soft);display:block;margin-bottom:3px}
+  .funcard input,.funcard select{width:100%;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;font-family:"Gowun Dodum";font-size:13.5px;background:#fff}
+  .funcard .ractions{display:flex;justify-content:flex-end;margin-top:4px}
+  .idea-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .ichip{font-family:"Gowun Dodum";font-size:12.5px;padding:5px 11px;border:1.5px solid var(--line);background:#fff;border-radius:999px;cursor:pointer;color:var(--ink)}
+  .ichip:hover{border-color:var(--gold)}
+  .part-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+  .partbtn{font-family:"Gowun Dodum";font-size:13.5px;padding:9px 8px;border:1.5px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;color:var(--ink);text-align:left}
+  .partbtn.on{background:var(--late-bg);border-color:var(--gold);font-weight:700}
+  .boardrow{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid var(--line)}
+  .boardrow .bn2{font-family:"Gowun Batang",serif;min-width:64px}
+  .boardrow .stars{flex:1;letter-spacing:1px}
+  .boardrow .bt{color:var(--soft);font-size:12.5px}
+  .ideagrp{margin-bottom:10px}
+  .ideah{font-family:"Gowun Batang",serif;color:var(--wine);font-size:13.5px;margin-bottom:5px}
+  .itag{display:inline-block;font-size:12.5px;padding:4px 10px;background:#efe6d3;border-radius:999px;margin:0 6px 6px 0;color:var(--ink)}
   .dh.hclick{cursor:pointer} .dh.hclick:hover{background:#e7d8b3}
   .name-c.nameclick{cursor:pointer} .name-c.nameclick:hover{background:#efe6d3}
 
@@ -144,6 +165,7 @@
     <button class="tab on" data-v="grid">출석부</button>
     <button class="tab" data-v="stats">통계</button>
     <button class="tab" data-v="roster">명단 · 반</button>
+    <button class="tab" data-v="fun">친교 한마당</button>
   </div>
 
   <div class="ttabs" id="teacherTabs"></div>
@@ -158,6 +180,8 @@
     <div class="toolbar">
       <button class="btn" id="rangeBtn">📅 기간 일괄 설정</button>
       <button class="btn" id="export">📄 CSV 내보내기</button>
+      <button class="btn" id="import">📥 CSV 불러오기</button>
+      <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none">
       <button class="btn" id="reset">↺ 초기화</button>
     </div>
     <div id="rangePanel" class="rpanel hide">
@@ -191,6 +215,31 @@
     <div id="rosterBody"></div>
   </section>
 
+  <section id="v-fun" class="hide">
+    <div class="funcard">
+      <h3 class="fh">이번 주일 기록</h3>
+      <div class="frow">
+        <div><label>주일 선택</label><select id="fun-sunday"></select></div>
+        <div style="flex:2"><label>오늘의 활동</label><input id="fun-act" placeholder="예: 풍선 배구"></div>
+      </div>
+      <div class="frow"><div style="flex:1"><label>한 줄 후기</label><input id="fun-memo" placeholder="아이들이 가장 즐거워한 순간, 다음에 보완할 점 등"></div></div>
+      <div class="idea-chips" id="fun-quick"></div>
+      <div class="ractions"><button class="btn primary" id="fun-save">활동 저장</button></div>
+    </div>
+    <div class="funcard">
+      <h3 class="fh">참여 스티커 <span class="fsub">학생을 누르면 ⭐ 한 개가 적립돼요</span></h3>
+      <div id="fun-participants" class="part-grid"></div>
+    </div>
+    <div class="funcard">
+      <h3 class="fh">스티커 현황 <span class="fsub">⭐ 8개마다 🎉 축하해요</span></h3>
+      <div id="fun-board"></div>
+    </div>
+    <div class="funcard">
+      <h3 class="fh">활동 아이디어 <span class="fsub">칩을 누르면 '오늘의 활동'에 입력돼요</span></h3>
+      <div id="fun-ideas"></div>
+    </div>
+  </section>
+
   <footer>제주교구 남원 자비의 예수 성당 주일학교 · 데이터는 이 기기에 안전하게 저장됩니다</footer>
 </div>
 
@@ -206,19 +255,18 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ===== 공유(클라우드) 설정 =====================================
-   여러 기기·여러 선생님이 같은 출결을 공유하려면 아래 값을 채우세요.
+   여러 기기에서 출결·활동을 공유하려면 아래 값을 채우세요.
    (Firebase 콘솔 → 프로젝트 설정 → 웹 앱 → firebaseConfig 복사)
    비워두면 이 기기 브라우저에만 저장됩니다(localStorage).            */
-const FIREBASE_CONFIG={
- apiKey: "AIzaSyCG_ye7uusY7okFWnMNpDbfAW_5rfdgD7Y",
-  authDomain: "attendance-1a939.firebaseapp.com",
-  databaseURL: "https://attendance-1a939-default-rtdb.firebaseio.com",
-  projectId: "attendance-1a939",
-};
+const FIREBASE_CONFIG={ apiKey:"", authDomain:"", databaseURL:"", projectId:"" };
 /* =============================================================== */
 const USE_CLOUD=!!(FIREBASE_CONFIG.databaseURL&&FIREBASE_CONFIG.apiKey&&window.firebase);
-let db=null;
+let db=null,loaded=false,cloudLoaded=false;
 if(USE_CLOUD){try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();}catch(e){console.warn("Firebase init 실패",e);}}
+function refreshAll(){renderTeacherTabs();renderGrid();
+  if(!document.getElementById("v-stats").classList.contains("hide")){renderStatMonths();renderStats();}
+  if(!document.getElementById("v-roster").classList.contains("hide"))renderRoster();
+  if(!document.getElementById("v-fun").classList.contains("hide"))renderFun();}
 
 const BASE=[
  {n:1, grade:"유치부", name:"고태온", bn:"사도요한", sex:"남", feast:"12.27", guardian:"부) 고경남 베드로 · 모) 조윤주 율리아", teacher:"신현하 수산나"},
@@ -248,32 +296,43 @@ const CYCLE=["","p","l","a"]; const MARK={p:"✓",l:"△",a:"✕"};
 const dateFromKey=k=>{const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d);};
 
 let data={}, extras=[], nextId=17, STUDENTS=BASE.slice();
+let activity={}, stickers={}, funSunday=null;
 let celebCell=new Map(), celebHeader=new Set(), celebBySunday=new Map();
 
-const KEY="seongdang-attendance-2026", RKEY="seongdang-roster-2026";
-let loaded=false;
-function refreshAll(){renderTeacherTabs();renderGrid();
-  if(!document.getElementById("v-stats").classList.contains("hide")){renderStatMonths();renderStats();}
-  if(!document.getElementById("v-roster").classList.contains("hide"))renderRoster();}
+const KEY="seongdang-attendance-2026", RKEY="seongdang-roster-2026", AKEY="seongdang-activity-2026", SKEY="seongdang-stickers-2026";
+async function dbGet(k){
+  if(USE_CLOUD){return await new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+    const t=setTimeout(()=>fin(null),4000);
+    try{db.ref(k).once("value",s=>{clearTimeout(t);fin(s.val()||null);},()=>{clearTimeout(t);fin(null);});}catch(e){clearTimeout(t);fin(null);}});}
+  try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
+function dbSet(k,v){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(k).set(v).catch(()=>{});}catch(e){}return;}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function dbDel(k){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(k).remove().catch(()=>{});}catch(e){}return;}try{localStorage.removeItem(k);}catch(e){}}
 async function load(){
-  if(USE_CLOUD){
-    await new Promise(res=>db.ref("attendance").once("value",s=>{data=s.val()||{};res();}));
-    await new Promise(res=>db.ref("roster").once("value",s=>{const o=s.val();if(o){extras=o.extras||[];nextId=o.nextId||17;}res();}));
+  if(USE_CLOUD&&db){
+    await new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res();}};const t=setTimeout(fin,4000);
+      try{db.ref(KEY).once("value",s=>{clearTimeout(t);const v=s.val();if(v)data=v;cloudLoaded=true;fin();},()=>{clearTimeout(t);fin();});}catch(e){clearTimeout(t);fin();}});
+    try{const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
+        const ac=await dbGet(AKEY);if(ac)activity=ac;
+        const sk=await dbGet(SKEY);if(sk)stickers=sk;}catch(e){}
     STUDENTS=BASE.concat(extras);
-    db.ref("attendance").on("value",s=>{if(!loaded)return;const nd=s.val()||{};if(JSON.stringify(nd)===JSON.stringify(data))return;data=nd;refreshAll();});
-    db.ref("roster").on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
+    db.ref(KEY).on("value",s=>{cloudLoaded=true;if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;refreshAll();});
+    db.ref(RKEY).on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
+    db.ref(AKEY).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(activity))return;activity=v;refreshAll();});
+    db.ref(SKEY).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(stickers))return;stickers=v;refreshAll();});
     return;
   }
-  try{const r=localStorage.getItem(KEY);if(r)data=JSON.parse(r);}catch(e){data={};}
-  try{const r=localStorage.getItem(RKEY);if(r){const o=JSON.parse(r);extras=o.extras||[];nextId=o.nextId||17;}}catch(e){extras=[];}
+  try{
+    const a=await dbGet(KEY);if(a)data=a;
+    const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
+    const ac=await dbGet(AKEY);if(ac)activity=ac;
+    const sk=await dbGet(SKEY);if(sk)stickers=sk;
+  }catch(e){}
   STUDENTS=BASE.concat(extras);
 }
-let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>{
-  if(USE_CLOUD){db.ref("attendance").set(data).catch(()=>{});}
-  else{try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}},150);}
-async function saveRoster(){
-  if(USE_CLOUD){db.ref("roster").set({extras,nextId}).catch(()=>{});}
-  else{try{localStorage.setItem(RKEY,JSON.stringify({extras,nextId}));}catch(e){}}}
+let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>dbSet(KEY,data),150);}
+async function saveRoster(){dbSet(RKEY,{extras,nextId});}
+function saveActivity(){dbSet(AKEY,activity);}
+function saveStickers(){dbSet(SKEY,stickers);}
 
 /* ---- 축일 ---- */
 function parseFeast(s){if(!s)return null;const m=String(s).match(/(\d{1,2})\D+(\d{1,2})/);if(!m)return null;
@@ -495,7 +554,8 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.getElementById("v-grid").classList.toggle("hide",v!=="grid");
   document.getElementById("v-stats").classList.toggle("hide",v!=="stats");
   document.getElementById("v-roster").classList.toggle("hide",v!=="roster");
-  if(v==="stats"){renderStatMonths();renderStats();}if(v==="roster")renderRoster();}));
+  document.getElementById("v-fun").classList.toggle("hide",v!=="fun");
+  if(v==="stats"){renderStatMonths();renderStats();}if(v==="roster")renderRoster();if(v==="fun")renderFun();}));
 
 document.getElementById("export").addEventListener("click",()=>{
   let rows=["반(교리교사),학년,성명,세례명,축일,"+SUNDAYS.map(s=>`${s.m}/${s.day}`).join(",")];
@@ -505,9 +565,38 @@ document.getElementById("export").addEventListener("click",()=>{
   const blob=new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="성당_주일출석부_2026.csv";a.click();});
 
+/* ---- CSV 불러오기 (Netlify → Vercel 이전용) ---- */
+function importCSV(text){
+  text=text.replace(/^\uFEFF/,"");
+  const lines=text.split(/\r?\n/).filter(x=>x.trim().length);
+  if(lines.length<2){alert("불러올 내용이 없습니다.");return;}
+  const header=lines[0].split(",");
+  const dateCols=[];
+  for(let c=5;c<header.length;c++){const mm=(header[c]||"").trim().split("/");
+    if(mm.length!==2)continue;const m=+mm[0],d=+mm[1];const s=SUNDAYS.find(x=>x.m===m&&x.day===d);if(s)dateCols.push({idx:c,key:s.key});}
+  if(!dateCols.length){alert("이 파일에서 날짜(주일) 열을 찾지 못했어요. 이 출석부에서 내보낸 CSV가 맞는지 확인해 주세요.");return;}
+  const rev={"출석":"p","지각":"l","결석":"a"};
+  let n=0;
+  for(let i=1;i<lines.length;i++){
+    const col=lines[i].split(",");const name=(col[2]||"").trim();if(!name)continue;
+    let st=STUDENTS.find(x=>x.name===name);
+    if(!st){st={n:nextId++,isExtra:true,name,grade:(col[1]||"-").trim(),bn:(col[3]||"").trim(),sex:"",feast:(col[4]||"-").trim(),guardian:"",teacher:(col[0]||"").trim()};
+            extras.push(st);STUDENTS=BASE.concat(extras);}
+    if(!data[st.n])data[st.n]={};
+    dateCols.forEach(dc=>{const code=rev[(col[dc.idx]||"").trim()];if(code)data[st.n][dc.key]=code;});
+    n++;
+  }
+  saveRoster();save();renderTeacherTabs();renderGrid();
+  alert(`불러오기 완료 — ${n}명의 출결을 반영했습니다.`);
+}
+document.getElementById("import").addEventListener("click",()=>document.getElementById("csvFile").click());
+document.getElementById("csvFile").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{try{importCSV(rd.result);}catch(err){alert("CSV를 읽는 중 문제가 발생했어요. 파일을 확인해 주세요.");}e.target.value="";};
+  rd.readAsText(f,"utf-8");});
+
 document.getElementById("reset").addEventListener("click",async()=>{
   if(!confirm("모든 출석 기록을 지울까요? 추가한 명단은 유지됩니다."))return;
-  data={};if(USE_CLOUD){db.ref("attendance").remove().catch(()=>{});}else{try{localStorage.removeItem(KEY);}catch(e){}}renderGrid();});
+  data={};dbDel(KEY);renderGrid();});
 
 /* ---- 기간 일괄 설정 ---- */
 function fillRangePanel(){
@@ -537,5 +626,52 @@ document.getElementById("r-apply").addEventListener("click",()=>{
     range.forEach(s=>{if(status)data[st.n][s.key]=status;else delete data[st.n][s.key];});});
   save();document.getElementById("rangePanel").classList.add("hide");renderGrid();});
 
-(async function(){await load();selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();loaded=true;})();
+/* ---- 친교 한마당 (활동 기록 + 스티커) ---- */
+const FUN_QUICK=["풍선 배구","보물찾기","미션 빙고","성경 골든벨","피구","발야구","만들기(축일 연계)","율동·노래","봉사활동"];
+const IDEAS={
+  "전체 함께":["풍선 배구","보물찾기(성경구절 숨기기)","미션 빙고","성경 골든벨","신문지 게임","림보","협동 줄넘기"],
+  "어린이부 (유치~초등)":["색칠 성화","묵주 만들기","율동·노래","스티커 꾸미기"],
+  "청소년부 (견진~고등)":["피구","발야구(킥볼)","플로어볼","역할극","봉사 활동"],
+  "축일·계절 연계":["축일 쿠키 데코","봄 소풍","여름 물놀이","성탄 행사","가족 미니 운동회"]
+};
+function defaultFunSunday(){const now=new Date();now.setHours(0,0,0,0);
+  const c=SUNDAYS.filter(s=>!isVac(s));let pick=c[0];
+  for(const s of c){if(dateFromKey(s.key)<=now)pick=s;else break;}return pick?pick.key:null;}
+function stickerTotal(n){return stickers[n]?Object.keys(stickers[n]).length:0;}
+function renderFun(){
+  const sel=document.getElementById("fun-sunday");
+  if(sel.options.length!==SUNDAYS.filter(s=>!isVac(s)).length)
+    sel.innerHTML=SUNDAYS.filter(s=>!isVac(s)).map(s=>`<option value="${s.key}">${s.m}/${s.day} 주일</option>`).join("");
+  if(!funSunday)funSunday=defaultFunSunday();
+  sel.value=funSunday;
+  const rec=activity[funSunday]||{};
+  document.getElementById("fun-act").value=rec.act||"";
+  document.getElementById("fun-memo").value=rec.memo||"";
+  document.getElementById("fun-quick").innerHTML=FUN_QUICK.map(x=>`<button class='ichip' data-x="${x}">${x}</button>`).join("");
+  document.querySelectorAll("#fun-quick .ichip").forEach(b=>b.onclick=()=>{document.getElementById("fun-act").value=b.dataset.x;});
+  renderParticipants();renderBoard();
+  document.getElementById("fun-ideas").innerHTML=Object.entries(IDEAS).map(([k,v])=>
+    `<div class='ideagrp'><div class='ideah'>${k}</div><div>${v.map(x=>`<span class='itag'>${x}</span>`).join("")}</div></div>`).join("");
+}
+function renderParticipants(){const box=document.getElementById("fun-participants");let h="";
+  filteredGroups().forEach(g=>g.members.forEach(st=>{const on=stickers[st.n]&&stickers[st.n][funSunday];
+    h+=`<button class='partbtn${on?" on":""}' data-n="${st.n}">${on?"⭐":"☆"} ${st.name}</button>`;}));
+  box.innerHTML=h||"<div class='fsub'>이 반에 학생이 없습니다.</div>";
+  box.querySelectorAll(".partbtn").forEach(b=>b.onclick=()=>toggleSticker(+b.dataset.n));}
+function toggleSticker(n){if(!stickers[n])stickers[n]={};
+  if(stickers[n][funSunday])delete stickers[n][funSunday];else stickers[n][funSunday]=1;
+  if(Object.keys(stickers[n]).length===0)delete stickers[n];
+  saveStickers();renderParticipants();renderBoard();}
+function renderBoard(){const box=document.getElementById("fun-board");let arr=[];
+  filteredGroups().forEach(g=>g.members.forEach(st=>arr.push({st,t:stickerTotal(st.n)})));
+  arr.sort((a,b)=>b.t-a.t);
+  box.innerHTML=arr.map(o=>{const stars="⭐".repeat(Math.min(o.t,10));const cheer=o.t>=8?" 🎉":"";
+    return `<div class='boardrow'><span class='bn2'>${o.st.name}</span><span class='stars'>${stars||"—"}</span><span class='bt'>${o.t}개${cheer}</span></div>`;}).join("");}
+document.getElementById("fun-sunday").addEventListener("change",e=>{funSunday=e.target.value;renderFun();});
+document.getElementById("fun-save").addEventListener("click",()=>{
+  activity[funSunday]={act:document.getElementById("fun-act").value.trim(),memo:document.getElementById("fun-memo").value.trim()};
+  saveActivity();const b=document.getElementById("fun-save");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);});
+
+selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();
+load().then(()=>{loaded=true;refreshAll();}).catch(()=>{loaded=true;});
 </script>
