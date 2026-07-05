@@ -181,6 +181,7 @@
       <button class="btn" id="rangeBtn">📅 기간 일괄 설정</button>
       <button class="btn" id="export">📄 CSV 내보내기</button>
       <button class="btn" id="import">📥 CSV 불러오기</button>
+      <button class="btn" id="restore">📋 붙여넣기 복원</button>
       <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none">
       <button class="btn" id="reset">↺ 초기화</button>
     </div>
@@ -194,6 +195,11 @@
         </select></div>
       </div>
       <div class="ractions"><button class="btn" id="r-cancel">닫기</button><button class="btn primary" id="r-apply">이 기간에 적용</button></div>
+    </div>
+    <div id="restorePanel" class="rpanel hide">
+      <label style="font-size:12px;color:var(--soft);display:block;margin-bottom:6px">예전 사이트(Console)에서 복사한 값(JSON)을 붙여넣고 '복원'을 누르세요.</label>
+      <textarea id="restoreText" rows="5" placeholder='{"a":"...","r":"...","ac":"...","s":"..."}  또는  {"1":{"2026-03-01":"p"}}' style="width:100%;padding:9px;border:1.5px solid var(--line);border-radius:8px;font-family:monospace;font-size:12px;background:#fff"></textarea>
+      <div class="ractions" style="margin-top:8px"><button class="btn" id="restore-cancel">닫기</button><button class="btn primary" id="restore-go">복원</button></div>
     </div>
     <p class="hint">셀을 탭하면 <b>출석·지각·결석</b> 아이콘이 나타나 바로 체크됩니다. <b>날짜 머리글</b>을 누르면 그 주일 <b>전체 학생</b>을, <b>학생 이름</b>을 누르면 그 학생의 <b>전 주일</b>을 한 번에 설정할 수 있어요. 8월은 여름방학이며 입력은 자동 저장됩니다.</p>
     <div class="scroll"><table id="grid"></table></div>
@@ -593,6 +599,33 @@ document.getElementById("import").addEventListener("click",()=>document.getEleme
 document.getElementById("csvFile").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;
   const rd=new FileReader();rd.onload=()=>{try{importCSV(rd.result);}catch(err){alert("CSV를 읽는 중 문제가 발생했어요. 파일을 확인해 주세요.");}e.target.value="";};
   rd.readAsText(f,"utf-8");});
+
+/* ---- 붙여넣기 복원 (예전 localStorage JSON → 새 앱) ---- */
+function parseMaybe(v){if(v==null)return null;if(typeof v==="object")return v;try{return JSON.parse(v);}catch(e){return null;}}
+function doRestore(txt){
+  txt=(txt||"").trim();if(!txt){alert("붙여넣은 내용이 없습니다.");return;}
+  let obj;try{obj=JSON.parse(txt);}catch(e){alert("JSON 형식이 아니에요. 복사한 값을 그대로 붙여넣어 주세요.");return;}
+  let att=obj,ros=null,act=null,stk=null;
+  if(obj&&typeof obj==="object"&&("a"in obj||"attendance"in obj)){
+    att=parseMaybe(obj.a!=null?obj.a:obj.attendance)||{};
+    ros=parseMaybe(obj.r!=null?obj.r:obj.roster);
+    act=parseMaybe(obj.ac!=null?obj.ac:obj.activity);
+    stk=parseMaybe(obj.s!=null?obj.s:obj.stickers);
+  }
+  if(ros&&ros.extras){extras=ros.extras;nextId=ros.nextId||nextId;STUDENTS=BASE.concat(extras);}
+  let cnt=0;
+  Object.keys(att||{}).forEach(n=>{if(att[n]&&typeof att[n]==="object"){if(!data[n])data[n]={};Object.assign(data[n],att[n]);cnt++;}});
+  if(act&&typeof act==="object")activity=Object.assign(activity,act);
+  if(stk&&typeof stk==="object")stickers=Object.assign(stickers,stk);
+  save();if(ros)saveRoster();if(act)saveActivity();if(stk)saveStickers();
+  renderTeacherTabs();renderGrid();
+  document.getElementById("restorePanel").classList.add("hide");
+  alert(`복원 완료 — ${cnt}명의 출결을 반영했습니다.`);
+}
+document.getElementById("restore").addEventListener("click",()=>{const p=document.getElementById("restorePanel");
+  p.classList.toggle("hide");if(!p.classList.contains("hide"))document.getElementById("restoreText").focus();});
+document.getElementById("restore-cancel").addEventListener("click",()=>document.getElementById("restorePanel").classList.add("hide"));
+document.getElementById("restore-go").addEventListener("click",()=>doRestore(document.getElementById("restoreText").value));
 
 document.getElementById("reset").addEventListener("click",async()=>{
   if(!confirm("모든 출석 기록을 지울까요? 추가한 명단은 유지됩니다."))return;
