@@ -118,6 +118,10 @@
   .ideagrp{margin-bottom:10px}
   .ideah{font-family:"Gowun Batang",serif;color:var(--wine);font-size:13.5px;margin-bottom:5px}
   .itag{display:inline-block;font-size:12.5px;padding:4px 10px;background:#efe6d3;border-radius:999px;margin:0 6px 6px 0;color:var(--ink)}
+  .logrow{display:flex;gap:10px;align-items:baseline;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer}
+  .logrow:hover{background:#f6efe0}
+  .logrow .ld{font-family:"Gowun Batang",serif;color:var(--wine);min-width:52px}
+  .logrow .la{font-weight:700} .logrow .lm{color:var(--soft);font-size:12.5px}
   .dh.hclick{cursor:pointer} .dh.hclick:hover{background:#e7d8b3}
   .name-c.nameclick{cursor:pointer} .name-c.nameclick:hover{background:#efe6d3}
 
@@ -152,10 +156,34 @@
   .form input,.form select{width:100%;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;font-family:"Gowun Dodum";font-size:13.5px;background:#fff}
   .form .actions{display:flex;gap:8px;justify-content:flex-end}
   footer{text-align:center;color:var(--soft);font-size:11.5px;margin-top:26px} .hide{display:none}
+  .lockscreen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(900px 500px at 50% -10%,#fbf3e2,transparent),var(--paper)}
+  .lockscreen.hide{display:none}
+  .lockbox{background:var(--paper2);border:1.5px solid var(--gold);border-radius:16px;padding:28px 26px;width:min(340px,86vw);
+    text-align:center;box-shadow:0 20px 50px -24px rgba(44,36,24,.6)}
+  .lockcross{font-size:26px;color:var(--gold)}
+  .locktitle{font-family:"Gowun Batang",serif;font-size:18px;font-weight:700;margin-top:4px}
+  .locksub{color:var(--soft);font-size:13px;margin:6px 0 14px}
+  .lockbox input{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:15px;
+    text-align:center;margin-bottom:10px;background:#fff;font-family:"Gowun Dodum"}
+  .lockmsg{color:var(--absent);font-size:12.5px;min-height:16px;margin-top:8px}
+  .lockmini{position:absolute;left:0;top:14px;padding:5px 10px;font-size:12px}
 </style>
+
+<div id="lock" class="lockscreen">
+  <div class="lockbox">
+    <div class="lockcross">✝</div>
+    <div class="locktitle">자비의 예수 성당 주일학교</div>
+    <div class="locksub">비밀번호를 입력하세요</div>
+    <input id="lockInput" type="password" inputmode="numeric" placeholder="비밀번호" autocomplete="off">
+    <button class="btn primary" id="lockBtn" style="width:100%">들어가기</button>
+    <div id="lockMsg" class="lockmsg"></div>
+  </div>
+</div>
 
 <div class="wrap">
   <header>
+    <button class="btn lockmini" id="lockNow" title="잠그기">🔒</button>
     <div class="eyebrow">제주교구 남원</div>
     <h1>자비의 예수 성당</h1>
     <div class="sub">주일학교 출석부 · 2026년 3월 ~ 12월 · 8월 여름방학</div>
@@ -180,6 +208,7 @@
     <div class="toolbar">
       <button class="btn" id="rangeBtn">📅 기간 일괄 설정</button>
       <button class="btn" id="export">📄 CSV 내보내기</button>
+      <button class="btn" id="backup">💾 백업 저장</button>
       <button class="btn" id="import">📥 CSV 불러오기</button>
       <button class="btn" id="restore">📋 붙여넣기 복원</button>
       <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none">
@@ -231,6 +260,10 @@
       <div class="frow"><div style="flex:1"><label>한 줄 후기</label><input id="fun-memo" placeholder="아이들이 가장 즐거워한 순간, 다음에 보완할 점 등"></div></div>
       <div class="idea-chips" id="fun-quick"></div>
       <div class="ractions"><button class="btn primary" id="fun-save">활동 저장</button></div>
+    </div>
+    <div class="funcard">
+      <h3 class="fh">활동 기록 목록 <span class="fsub">항목을 누르면 그 주일로 이동해요</span></h3>
+      <div id="fun-log"></div>
     </div>
     <div class="funcard">
       <h3 class="fh">참여 스티커 <span class="fsub">학생을 누르면 ⭐ 한 개가 적립돼요</span></h3>
@@ -323,8 +356,7 @@ async function load(){
         const ac=await dbGet(AKEY);if(ac)activity=ac;
         const sk=await dbGet(SKEY);if(sk)stickers=sk;}catch(e){}
     STUDENTS=BASE.concat(extras);
-    // attendance is always kept in sync with cloud (fixes empty-overwrite race)
-    db.ref(cpath(KEY)).on("value",s=>{cloudLoaded=true;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;if(loaded)refreshAll();});
+    db.ref(cpath(KEY)).on("value",s=>{cloudLoaded=true;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;if(loaded){refreshAll();autoBackup();}});
     db.ref(cpath(RKEY)).on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
     db.ref(cpath(AKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(activity))return;activity=v;refreshAll();});
     db.ref(cpath(SKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(stickers))return;stickers=v;refreshAll();});
@@ -338,10 +370,12 @@ async function load(){
   }catch(e){}
   STUDENTS=BASE.concat(extras);
 }
-let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>dbSet(KEY,data),150);}
-async function saveRoster(){dbSet(RKEY,{extras,nextId});}
-function saveActivity(){dbSet(AKEY,activity);}
-function saveStickers(){dbSet(SKEY,stickers);}
+let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>{dbSet(KEY,data);autoBackup();},150);}
+async function saveRoster(){dbSet(RKEY,{extras,nextId});autoBackup();}
+function saveActivity(){dbSet(AKEY,activity);autoBackup();}
+function saveStickers(){dbSet(SKEY,stickers);autoBackup();}
+function backupBundle(){return {date:new Date().toISOString(),a:data,r:{extras,nextId},ac:activity,s:stickers};}
+function autoBackup(){try{localStorage.setItem("cattend-autobackup",JSON.stringify(backupBundle()));}catch(e){}}
 
 /* ---- 축일 ---- */
 function parseFeast(s){if(!s)return null;const m=String(s).match(/(\d{1,2})\D+(\d{1,2})/);if(!m)return null;
@@ -576,6 +610,25 @@ document.getElementById("export").addEventListener("click",()=>{
   const blob=new Blob(["\uFEFF"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="성당_주일출석부_2026.csv";a.click();});
 
+/* ---- 날짜별 백업 파일 저장 ---- */
+document.getElementById("backup").addEventListener("click",()=>{
+  const d=new Date();const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const blob=new Blob([JSON.stringify(backupBundle(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`자비출석부_백업_${ds}.json`;a.click();
+  const b=document.getElementById("backup");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);});
+
+/* ---- 비밀번호 잠금 (간단한 접근 잠금) ---- */
+const APP_PASSWORD="namwon1957";  /* ← 원하는 비밀번호로 바꾸세요 */
+function unlock(){document.getElementById("lock").classList.add("hide");}
+function relock(){try{localStorage.removeItem("cattend-unlock");}catch(e){}document.getElementById("lockInput").value="";document.getElementById("lock").classList.remove("hide");}
+function tryUnlock(){const v=document.getElementById("lockInput").value;
+  if(v===APP_PASSWORD){try{localStorage.setItem("cattend-unlock",APP_PASSWORD);}catch(e){}unlock();}
+  else{document.getElementById("lockMsg").textContent="비밀번호가 올바르지 않습니다.";}}
+document.getElementById("lockBtn").addEventListener("click",tryUnlock);
+document.getElementById("lockInput").addEventListener("keydown",e=>{if(e.key==="Enter")tryUnlock();});
+document.getElementById("lockNow").addEventListener("click",relock);
+try{if(localStorage.getItem("cattend-unlock")===APP_PASSWORD)unlock();else document.getElementById("lockInput").focus();}catch(e){}
+
 /* ---- CSV 불러오기 (Netlify → Vercel 이전용) ---- */
 function importCSV(text){
   text=text.replace(/^\uFEFF/,"");
@@ -691,7 +744,15 @@ function renderFun(){
   renderParticipants();renderBoard();
   document.getElementById("fun-ideas").innerHTML=Object.entries(IDEAS).map(([k,v])=>
     `<div class='ideagrp'><div class='ideah'>${k}</div><div>${v.map(x=>`<span class='itag'>${x}</span>`).join("")}</div></div>`).join("");
+  renderFunLog();
 }
+function renderFunLog(){const box=document.getElementById("fun-log");
+  const keys=Object.keys(activity).filter(k=>activity[k]&&(activity[k].act||activity[k].memo)).sort();
+  if(!keys.length){box.innerHTML="<div class='fsub'>아직 기록된 활동이 없습니다.</div>";return;}
+  box.innerHTML=keys.map(k=>{const s=SUNDAYS.find(x=>x.key===k);const lbl=s?`${s.m}/${s.day}`:k;const r=activity[k];
+    return `<div class='logrow' data-k='${k}'><span class='ld'>${lbl}</span><span class='la'>${r.act||"(활동 미기재)"}</span>${r.memo?`<span class='lm'>— ${r.memo}</span>`:""}</div>`;}).join("");
+  box.querySelectorAll(".logrow").forEach(row=>row.addEventListener("click",()=>{funSunday=row.dataset.k;renderFun();
+    document.getElementById("fun-act").scrollIntoView({behavior:"smooth",block:"center"});}));}
 function renderParticipants(){const box=document.getElementById("fun-participants");let h="";
   filteredGroups().forEach(g=>g.members.forEach(st=>{const on=stickers[st.n]&&stickers[st.n][funSunday];
     h+=`<button class='partbtn${on?" on":""}' data-n="${st.n}">${on?"⭐":"☆"} ${st.name}</button>`;}));
@@ -709,7 +770,7 @@ function renderBoard(){const box=document.getElementById("fun-board");let arr=[]
 document.getElementById("fun-sunday").addEventListener("change",e=>{funSunday=e.target.value;renderFun();});
 document.getElementById("fun-save").addEventListener("click",()=>{
   activity[funSunday]={act:document.getElementById("fun-act").value.trim(),memo:document.getElementById("fun-memo").value.trim()};
-  saveActivity();const b=document.getElementById("fun-save");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);});
+  saveActivity();const b=document.getElementById("fun-save");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);renderFunLog();});
 
 selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();
 load().then(()=>{loaded=true;refreshAll();}).catch(()=>{loaded=true;});
