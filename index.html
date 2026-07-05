@@ -618,7 +618,7 @@ document.getElementById("backup").addEventListener("click",()=>{
   const b=document.getElementById("backup");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);});
 
 /* ---- 비밀번호 잠금 (간단한 접근 잠금) ---- */
-const APP_PASSWORD="namwon1957";  /* ← 원하는 비밀번호로 바꾸세요 */
+const APP_PASSWORD="1234";  /* ← 원하는 비밀번호로 바꾸세요 */
 function unlock(){document.getElementById("lock").classList.add("hide");}
 function relock(){try{localStorage.removeItem("cattend-unlock");}catch(e){}document.getElementById("lockInput").value="";document.getElementById("lock").classList.remove("hide");}
 function tryUnlock(){const v=document.getElementById("lockInput").value;
