@@ -257,7 +257,25 @@
   <button data-v="" class="clr"><span class="ic">⌫</span>미체크</button>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
+/* ===== 공유(클라우드) 설정 — 기존 Firebase 프로젝트에 연결됨 ===== */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCG_ye7uusY7okFWnMNpDbfAW_5rfdgD7Y",
+  authDomain:"attendance-1a939.firebaseapp.com",
+  databaseURL:"https://attendance-1a939-default-rtdb.firebaseio.com",
+  projectId:"attendance-1a939"
+};
+function cpath(k){return ({"seongdang-attendance-2026":"attendance","seongdang-roster-2026":"roster","seongdang-activity-2026":"activity","seongdang-stickers-2026":"stickers"})[k]||k;}
+const USE_CLOUD=!!(FIREBASE_CONFIG.databaseURL&&FIREBASE_CONFIG.apiKey&&window.firebase);
+let db=null,loaded=false,cloudLoaded=false;
+if(USE_CLOUD){try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();}catch(e){console.warn("Firebase init 실패",e);}}
+function refreshAll(){renderTeacherTabs();renderGrid();
+  if(!document.getElementById("v-stats").classList.contains("hide")){renderStatMonths();renderStats();}
+  if(!document.getElementById("v-roster").classList.contains("hide"))renderRoster();
+  if(!document.getElementById("v-fun").classList.contains("hide"))renderFun();}
+
 const BASE=[
  {n:1, grade:"유치부", name:"고태온", bn:"사도요한", sex:"남", feast:"12.27", guardian:"부) 고경남 베드로 · 모) 조윤주 율리아", teacher:"신현하 수산나"},
  {n:2, grade:"초등1", name:"신서율", bn:"라파엘라", sex:"여", feast:"5.2", guardian:"모) 허유리 모니카", teacher:"신현하 수산나"},
@@ -290,14 +308,34 @@ let activity={}, stickers={}, funSunday=null;
 let celebCell=new Map(), celebHeader=new Set(), celebBySunday=new Map();
 
 const KEY="seongdang-attendance-2026", RKEY="seongdang-roster-2026", AKEY="seongdang-activity-2026", SKEY="seongdang-stickers-2026";
-async function dbGet(k){try{const r=await window.storage.get(k);return r&&r.value?JSON.parse(r.value):null;}catch(e){return null;}}
-function dbSet(k,v){try{window.storage.set(k,JSON.stringify(v),false);}catch(e){}}
-function dbDel(k){try{window.storage.delete(k,false);}catch(e){}}
+async function dbGet(k){
+  if(USE_CLOUD){return await new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+    const t=setTimeout(()=>fin(null),4000);
+    try{db.ref(cpath(k)).once("value",s=>{clearTimeout(t);fin(s.val()||null);},()=>{clearTimeout(t);fin(null);});}catch(e){clearTimeout(t);fin(null);}});}
+  try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
+function dbSet(k,v){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(cpath(k)).set(v).catch(()=>{});}catch(e){}return;}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function dbDel(k){if(USE_CLOUD){if(!cloudLoaded)return;try{db.ref(cpath(k)).remove().catch(()=>{});}catch(e){}return;}try{localStorage.removeItem(k);}catch(e){}}
 async function load(){
-  const a=await dbGet(KEY);if(a)data=a;
-  const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
-  const ac=await dbGet(AKEY);if(ac)activity=ac;
-  const sk=await dbGet(SKEY);if(sk)stickers=sk;
+  if(USE_CLOUD&&db){
+    await new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res();}};const t=setTimeout(fin,4000);
+      try{db.ref(cpath(KEY)).once("value",s=>{clearTimeout(t);const v=s.val();if(v)data=v;cloudLoaded=true;fin();},()=>{clearTimeout(t);fin();});}catch(e){clearTimeout(t);fin();}});
+    try{const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
+        const ac=await dbGet(AKEY);if(ac)activity=ac;
+        const sk=await dbGet(SKEY);if(sk)stickers=sk;}catch(e){}
+    STUDENTS=BASE.concat(extras);
+    // attendance is always kept in sync with cloud (fixes empty-overwrite race)
+    db.ref(cpath(KEY)).on("value",s=>{cloudLoaded=true;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(data))return;data=v;if(loaded)refreshAll();});
+    db.ref(cpath(RKEY)).on("value",s=>{if(!loaded)return;const o=s.val()||{};const ne=o.extras||[];if(JSON.stringify(ne)===JSON.stringify(extras))return;extras=ne;nextId=o.nextId||17;STUDENTS=BASE.concat(extras);refreshAll();});
+    db.ref(cpath(AKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(activity))return;activity=v;refreshAll();});
+    db.ref(cpath(SKEY)).on("value",s=>{if(!loaded)return;const v=s.val()||{};if(JSON.stringify(v)===JSON.stringify(stickers))return;stickers=v;refreshAll();});
+    return;
+  }
+  try{
+    const a=await dbGet(KEY);if(a)data=a;
+    const r=await dbGet(RKEY);if(r){extras=r.extras||[];nextId=r.nextId||17;}
+    const ac=await dbGet(AKEY);if(ac)activity=ac;
+    const sk=await dbGet(SKEY);if(sk)stickers=sk;
+  }catch(e){}
   STUDENTS=BASE.concat(extras);
 }
 let st1;function save(){clearTimeout(st1);st1=setTimeout(()=>dbSet(KEY,data),150);}
@@ -595,7 +633,8 @@ document.getElementById("restore-cancel").addEventListener("click",()=>document.
 document.getElementById("restore-go").addEventListener("click",()=>doRestore(document.getElementById("restoreText").value));
 
 document.getElementById("reset").addEventListener("click",async()=>{
-  if(!confirm("모든 출석 기록을 지울까요? 추가한 명단은 유지됩니다."))return;
+  if(!confirm("[주의] 모든 출석 기록을 지웁니다. 공유(클라우드) 사용 시 모두에게서 사라지며 되돌릴 수 없습니다. 정말 지울까요?"))return;
+  if(!confirm("한 번 더 확인합니다. 정말로 전체 출결을 삭제할까요?"))return;
   data={};dbDel(KEY);renderGrid();});
 
 /* ---- 기간 일괄 설정 ---- */
@@ -672,5 +711,6 @@ document.getElementById("fun-save").addEventListener("click",()=>{
   activity[funSunday]={act:document.getElementById("fun-act").value.trim(),memo:document.getElementById("fun-memo").value.trim()};
   saveActivity();const b=document.getElementById("fun-save");const t=b.textContent;b.textContent="저장됨 ✓";setTimeout(()=>b.textContent=t,1200);});
 
-(async function(){await load();selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();})();
+selectedTeacher=teacherNames()[0]||ALL;renderTeacherTabs();renderGrid();
+load().then(()=>{loaded=true;refreshAll();}).catch(()=>{loaded=true;});
 </script>
